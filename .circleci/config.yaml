@@ -1,0 +1,63 @@
+# Use the latest 2.1 version of CircleCI pipeline processing engine, see https://circleci.com/docs/2.0/configuration-reference/
+version: 2.1
+orbs:
+  aws-cli: circleci/aws-cli@0.1.13
+
+description: |
+  Configure and store AWS credentials in
+  ~/.aws/credentials and ~/.aws/config
+parameters:
+  profile-name:
+    description: Profile name to be configured.
+    type: string
+    default: default
+  aws-access-key-id:
+    description: |
+      AWS access key id for IAM role. Set this to the name of
+      the environment variable you will use to hold this
+      value, i.e. AWS_ACCESS_KEY.
+    type: env_var_name
+    default: AWS_ACCESS_KEY_ID
+  aws-secret-access-key:
+    description: |
+      AWS secret key for IAM role. Set this to the name of
+      the environment variable you will use to hold this
+      value, i.e. $AWS_SECRET_ACCESS_KEY.
+    type: env_var_name
+    default: AWS_SECRET_ACCESS_KEY
+  aws-region:
+    description: |
+      Env var of AWS region to operate in
+      (defaults to AWS_DEFAULT_REGION)
+    type: env_var_name
+    default: AWS_DEFAULT_REGION
+  configure-default-region:
+    description: >
+      Some AWS actions don't require a region; set this to false if you do not
+      want to store a default region in ~/.aws/config
+    type: boolean
+    default: true
+
+
+jobs:
+  deploy:
+    docker:
+      - image: circleci/node:9.9
+    working_directory: ~/
+    steps:
+      - checkout
+      - run:
+          name: Install awscli
+          command: sudo pip install awscl
+      - run:
+          name: Deploy to S3
+          command: aws s3 cp index.html s3://rebellionrobotics.io/
+
+# Orchestrate or schedule a set of jobs, see https://circleci.com/docs/2.0/workflows/
+workflows:
+  deploy:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only: master
