@@ -1,2 +1,2 @@
 deploy_s3:
-	aws s3 cp index.html s3://rebellionrobotics.io/
+	aws s3 cp ./ s3://rebellionrobotics.io/ --recursive --exclude "*" --include "*.html" --include "*.css"
